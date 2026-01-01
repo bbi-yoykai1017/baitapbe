@@ -1,3 +1,19 @@
+<?php
+// 1. Kết nối CSDL
+require_once 'database.php';
+
+// 2. Viết truy vấn lấy tất cả tin, kết bảng tác giả và danh mục, sắp xếp mới nhất lên đầu
+$sql = "SELECT items.*, categories.name AS category_name, authors.name AS author_name 
+        FROM items 
+        JOIN categories ON items.category = categories.id 
+        JOIN authors ON items.author = authors.id 
+        ORDER BY items.created_at DESC";
+
+$result = $conn->query($sql);
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="vi">
 
