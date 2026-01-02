@@ -33,7 +33,7 @@ $sql = "SELECT items.*,
         FROM items 
         LEFT JOIN authors ON items.author = authors.id 
         LEFT JOIN categories ON items.category = categories.id
-        ORDER BY items.created_at DESC";
+        ORDER BY items.created_at DESC LIMIT $limit,$offset";
 
 $items = $db->select($sql);
 ?>
