@@ -1,8 +1,27 @@
 <?php
 require_once 'database.php';
 $db = new Database();
+// phan trang
+$limit = 4;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page -1) * $limit;
+$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
+$cad_id = isset($_GET['cad_id']) ? $_GET['cad_id'] : '';
+// dieu kien loc
+$where = [];
+if ($keyword) $where[] = "items.title LIKE '%$keyword%'";
+if ($cad_id) $where[] = "items.category = " . $cad_id;
+$sqlWhere = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
-// Lấy tất cả bài viết từ bảng items, sắp xếp mới nhất lên đầu
+// lay danh muc
+$categoris = "SELECT * FROM categories";
+
+// tinh tong bai viet(de phan trang)
+$sqlCount ="SELECT COUNT(*) as total from items $sqlWhere";
+$countresult = $db->select($sqlCount);
+$totalreconds = $countresult[0]['total'];
+$totalpages = ceil($totalreconds / $limit);
+
 // JOIN với bảng authors và categories để lấy tên tác giả và danh mục
 $sql = "SELECT items.*, 
                authors.name as author_name,
@@ -81,7 +100,7 @@ $items = $db->select($sql);
 
                     <div class="row mb-3">
                         <div class="col-12">
-                            <a href="form_add_item.html" class="btn btn-primary">
+                            <a href="form_add_item.php" class="btn btn-primary">
                                 <i data-feather="plus"></i> Thêm bài viết mới
                             </a>
                         </div>
