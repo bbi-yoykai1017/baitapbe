@@ -16,11 +16,11 @@ if ($keyword) {
     $where[] = "items.title LIKE '%$keyword%'";
 }
 if ($cat_id) {
-    $where[] = "items.category = " . (int)$cat_id; // Ép kiểu int cho an toàn
+    $where[] = "items.category = " . (int)$cat_id; 
 }
 $sqlWhere = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
-// 3. LẤY DANH SÁCH DANH MỤC (SỬA LỖI QUERY)
+// 3. LẤY DANH SÁCH DANH MỤC 
 $categories = $db->select("SELECT * FROM categories");
 
 // 4. TÍNH TỔNG BÀI VIẾT
@@ -29,7 +29,7 @@ $countresult = $db->select($sqlCount);
 $total_records = $countresult[0]['total'];
 $totalpages = ceil($total_records / $limit);
 
-// 5. LẤY DỮ LIỆU BÀI VIẾT (SỬA LỖI THIẾU LIMIT)
+// 5. LẤY DỮ LIỆU BÀI VIẾT 
 $sql = "SELECT items.*, 
                authors.name as author_name,
                categories.name as category_name
@@ -38,7 +38,7 @@ $sql = "SELECT items.*,
         LEFT JOIN categories ON items.category = categories.id
         $sqlWhere
         ORDER BY items.created_at DESC
-        LIMIT $offset, $limit"; // Đã thêm LIMIT
+        LIMIT $offset, $limit"; 
 
 $items = $db->select($sql);
 ?>
@@ -115,32 +115,14 @@ $items = $db->select($sql);
                                         </div>
                                     </form>
 
-                                    <?php if ($totalpages > 1): ?>
-                                        <div class="d-flex justify-content-center mt-3">
-                                            <nav aria-label="Page navigation">
-                                                <ul class="pagination">
-                                                    <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>">
-                                                        <a class="page-link" href="?page=<?php echo $page - 1; ?>&keyword=<?php echo $keyword; ?>&cat_id=<?php echo $cat_id; ?>">Trước</a>
-                                                    </li>
-                                                    <?php for ($i = 1; $i <= $totalpages; $i++): ?>
-                                                        <li class="page-item <?php echo ($page == $i) ? 'active' : ''; ?>">
-                                                            <a class="page-link" href="?page=<?php echo $i; ?>&keyword=<?php echo $keyword; ?>&cat_id=<?php echo $cat_id; ?>"><?php echo $i; ?></a>
-                                                        </li>
-                                                    <?php endfor; ?>
-                                                    <li class="page-item <?php echo ($page >= $totalpages) ? 'disabled' : ''; ?>">
-                                                        <a class="page-link" href="?page=<?php echo $page + 1; ?>&keyword=<?php echo $keyword; ?>&cat_id=<?php echo $cat_id; ?>">Sau</a>
-                                                    </li>
-                                                </ul>
-                                            </nav>
-                                        </div>
-                                    <?php endif; ?>
+                                    
                                 </div>
 
                                 <div class="table-responsive">
                                     <table class="table table-hover mb-0">
                                         <thead>
                                             <tr>
-                                                <th>ID</th>
+                                                <!-- <th>ID</th> -->
                                                 <th>Hình ảnh</th>
                                                 <th>Tiêu đề</th>
                                                 <th>Danh mục</th>
@@ -154,7 +136,7 @@ $items = $db->select($sql);
                                             <?php if (!empty($items)): ?>
                                                 <?php foreach ($items as $row): ?>
                                                     <tr>
-                                                        <td><strong>#<?php echo $row['id']; ?></strong></td>
+                                                        <!-- <td><strong>#<?php echo $row['id']; ?></strong></td> -->
                                                         <td>
                                                             <?php
                                                             $imgSrc = $row['image'];
@@ -176,7 +158,6 @@ $items = $db->select($sql);
                                                         <td class="d-none d-md-table-cell"><small><?php echo date('d/m/Y', strtotime($row['created_at'])); ?></small></td>
                                                         <td>
                                                             <div class="btn-group">
-                                                                <button class="btn btn-sm btn-outline-info"><i data-feather="eye"></i></button>
                                                                 <button class="btn btn-sm btn-outline-warning"><i data-feather="edit"></i></button>
                                                                 <button class="btn btn-sm btn-outline-danger"><i data-feather="trash-2"></i></button>
                                                             </div>
@@ -192,6 +173,25 @@ $items = $db->select($sql);
                                             <?php endif; ?>
                                         </tbody>
                                     </table>
+                                    <?php if ($totalpages > 1): ?>
+                                        <div class="d-flex justify-content-center mt-3">
+                                            <nav aria-label="Page navigation">
+                                                <ul class="pagination">
+                                                    <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>">
+                                                        <a class="page-link" href="?page=<?php echo $page - 1; ?>&keyword=<?php echo $keyword; ?>&cat_id=<?php echo $cat_id; ?>">Trước</a>
+                                                    </li>
+                                                    <?php for ($i = 1; $i <= $totalpages; $i++): ?>
+                                                        <li class="page-item <?php echo ($page == $i) ? 'active' : ''; ?>">
+                                                            <a class="page-link" href="?page=<?php echo $i; ?>&keyword=<?php echo $keyword; ?>&cat_id=<?php echo $cat_id; ?>"><?php echo $i; ?></a>
+                                                        </li>
+                                                    <?php endfor; ?>
+                                                    <li class="page-item <?php echo ($page >= $totalpages) ? 'disabled' : ''; ?>">
+                                                        <a class="page-link" href="?page=<?php echo $page + 1; ?>&keyword=<?php echo $keyword; ?>&cat_id=<?php echo $cat_id; ?>">Sau</a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
