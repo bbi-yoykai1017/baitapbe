@@ -1,12 +1,14 @@
 <?php
 require_once 'database.php';
 $db = new Database();
+
 // phan trang
 $limit = 4;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page -1) * $limit;
 $keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
 $cad_id = isset($_GET['cad_id']) ? $_GET['cad_id'] : '';
+
 // dieu kien loc
 $where = [];
 if ($keyword) $where[] = "items.title LIKE '%$keyword%'";
