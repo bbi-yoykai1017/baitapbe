@@ -4,22 +4,24 @@ $db = new Database();
 
 // phan trang
 $limit = 4;
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($page -1) * $limit;
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
 $keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
-$cad_id = isset($_GET['cad_id']) ? $_GET['cad_id'] : '';
+$cat_id = isset($_GET['cat_id']) ? $_GET['cat_id'] : '';
 
 // dieu kien loc
 $where = [];
-if ($keyword) $where[] = "items.title LIKE '%$keyword%'";
-if ($cad_id) $where[] = "items.category = " . $cad_id;
+if ($keyword)
+    $where[] = "items.title LIKE '%$keyword%'";
+if ($cat_id)
+    $where[] = "items.category = " . $cat_id;
 $sqlWhere = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
 // lay danh muc
 $categoris = "SELECT * FROM categories";
 
 // tinh tong bai viet(de phan trang)
-$sqlCount ="SELECT COUNT(*) as total from items $sqlWhere";
+$sqlCount = "SELECT COUNT(*) as total from items $sqlWhere";
 $countresult = $db->select($sqlCount);
 $totalreconds = $countresult[0]['total'];
 $totalpages = ceil($totalreconds / $limit);
@@ -52,7 +54,7 @@ $items = $db->select($sql);
     <title>Quản lý bài viết - E-News Admin</title>
 
     <link href="./public/css/app.css" rel="stylesheet">
-    
+
     <style>
         /* CSS bổ sung để ảnh hiển thị gọn trong bảng */
         .thumb-img {
@@ -61,6 +63,7 @@ $items = $db->select($sql);
             object-fit: cover;
             border-radius: 4px;
         }
+
         .text-limit {
             max-width: 300px;
             white-space: nowrap;
@@ -81,10 +84,11 @@ $items = $db->select($sql);
                     <li class="sidebar-header">Pages</li>
                     <li class="sidebar-item active">
                         <a class="sidebar-link" href="index.php">
-                            <i class="align-middle" data-feather="file-text"></i> <span class="align-middle">Bài viết</span>
+                            <i class="align-middle" data-feather="file-text"></i> <span class="align-middle">Bài
+                                viết</span>
                         </a>
                     </li>
-                    </ul>
+                </ul>
             </div>
         </nav>
 
@@ -93,7 +97,7 @@ $items = $db->select($sql);
                 <a class="sidebar-toggle js-sidebar-toggle">
                     <i class="hamburger align-self-center"></i>
                 </a>
-                </nav>
+            </nav>
 
             <main class="content">
                 <div class="container-fluid p-0">
@@ -112,8 +116,62 @@ $items = $db->select($sql);
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h5 class="card-title">Bảng tin tức (Items) - Tổng: <?php echo count($items); ?> bài viết</h5>
+                                    <h5 class="card-title">Bảng tin tức (Items) - Tổng: <?php echo count($items); ?> bài
+                                        viết</h5>
                                 </div>
+
+                                <div class="card-body">
+                                    <form action="GET" method="" class="row mb-3">
+                                        <div class="col-md-4">
+                                            <input type="text" name="keyword" class="form-control"
+                                                placeholder="nhập tên bài viết..." value="<?= $keyword; ?>">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select name="cad_id" class="form-control">
+                                                <option value="">Tất cả danh sách cho danh mục</option>
+                                                <?php foreach ($categori as $cat): ?>
+                                                    <option value="<?= $cat['id']; ?>" <?= ($cat_id == $cat['id']) ? 'selected' : '' ?>><?= $cat['name']; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="submit" class="btn btn-primary w-100"><i
+                                                    data-feather="search"></i> Tìm kiếm</button>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="index.php" class="btn btn-outline-secondary w-100"><i
+                                                    data-feather="refresh-cw"></i> Reset</a>
+                                        </div>
+                                    </form>
+                                    <?php if ($totalpages > 1): ?>
+                                        <div class="d-flex justify-content-center mt-3">
+                                            <nav aria-label="Page navigation">
+                                                <ul class="pagination">
+                                                    <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>">
+                                                        <a class="page-link"
+                                                            href="?page=<?php echo $page - 1; ?>&keyword=<?php echo $keyword; ?>&cat_id=<?php echo $cat_id; ?>">Trước</a>
+                                                    </li>
+
+                                                    <?php for ($i = 1; $i <= $totalpages; $i++): ?>
+                                                        <li class="page-item <?php echo ($page == $i) ? 'active' : ''; ?>">
+                                                            <a class="page-link"
+                                                                href="?page=<?php echo $i; ?>&keyword=<?php echo $keyword; ?>&cat_id=<?php echo $cat_id; ?>">
+                                                                <?php echo $i; ?>
+                                                            </a>
+                                                        </li>
+                                                    <?php endfor; ?>
+
+                                                    <li
+                                                        class="page-item <?php echo ($page >= $totalpages) ? 'disabled' : ''; ?>">
+                                                        <a class="page-link"
+                                                            href="?page=<?php echo $page + 1; ?>&keyword=<?php echo $keyword; ?>&cat_id=<?php echo $cat_id; ?>">Sau</a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+
                                 <div class="table-responsive">
                                     <table class="table table-hover mb-0">
                                         <thead>
@@ -133,25 +191,26 @@ $items = $db->select($sql);
                                                 <?php foreach ($items as $row): ?>
                                                     <tr>
                                                         <td><strong>#<?php echo $row['id']; ?></strong></td>
-                                                        
+
                                                         <td>
-                                                            <?php 
-                                                                $imgSrc = $row['image'];
-                                                                if (!filter_var($imgSrc, FILTER_VALIDATE_URL)) {
-                                                                    $imgSrc = "./public/images/" . $imgSrc; 
-                                                                }
+                                                            <?php
+                                                            $imgSrc = $row['image'];
+                                                            if (!filter_var($imgSrc, FILTER_VALIDATE_URL)) {
+                                                                $imgSrc = "./public/images/" . $imgSrc;
+                                                            }
                                                             ?>
-                                                            <img src="<?php echo $imgSrc; ?>" 
-                                                                 class="thumb-img" 
-                                                                 onerror="this.src='./public/images/user.jpg'" 
-                                                                 alt="<?php echo htmlspecialchars($row['title']); ?>">
+                                                            <img src="<?php echo $imgSrc; ?>" class="thumb-img"
+                                                                onerror="this.src='./public/images/user.jpg'"
+                                                                alt="<?php echo htmlspecialchars($row['title']); ?>">
                                                         </td>
 
                                                         <td>
-                                                            <div class="text-limit" title="<?php echo htmlspecialchars($row['title']); ?>">
+                                                            <div class="text-limit"
+                                                                title="<?php echo htmlspecialchars($row['title']); ?>">
                                                                 <strong><?php echo substr($row['title'], 0, 40); ?>...</strong>
                                                             </div>
-                                                            <small class="text-muted"><?php echo substr($row['excerpt'], 0, 50); ?>...</small>
+                                                            <small
+                                                                class="text-muted"><?php echo substr($row['excerpt'], 0, 50); ?>...</small>
                                                         </td>
 
                                                         <td>
@@ -167,7 +226,8 @@ $items = $db->select($sql);
                                                         </td>
 
                                                         <td class="d-none d-md-table-cell">
-                                                            <span class="badge bg-warning"><?php echo $row['views']; ?> lượt</span>
+                                                            <span class="badge bg-warning"><?php echo $row['views']; ?>
+                                                                lượt</span>
                                                         </td>
 
                                                         <td class="d-none d-md-table-cell">
@@ -176,13 +236,16 @@ $items = $db->select($sql);
 
                                                         <td>
                                                             <div class="btn-group" role="group">
-                                                                <button type="button" class="btn btn-sm btn-outline-info" title="Xem chi tiết">
+                                                                <button type="button" class="btn btn-sm btn-outline-info"
+                                                                    title="Xem chi tiết">
                                                                     <i data-feather="eye"></i>
                                                                 </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-warning" title="Chỉnh sửa">
+                                                                <button type="button" class="btn btn-sm btn-outline-warning"
+                                                                    title="Chỉnh sửa">
                                                                     <i data-feather="edit"></i>
                                                                 </button>
-                                                                <button type="button" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                                                    title="Xóa">
                                                                     <i data-feather="trash-2"></i>
                                                                 </button>
                                                             </div>
@@ -193,7 +256,8 @@ $items = $db->select($sql);
                                                 <tr>
                                                     <td colspan="8" class="text-center py-4">
                                                         <p class="text-muted">Không có dữ liệu bài viết.</p>
-                                                        <a href="form_add_item.html" class="btn btn-primary btn-sm">Thêm bài viết đầu tiên</a>
+                                                        <a href="form_add_item.html" class="btn btn-primary btn-sm">Thêm bài
+                                                            viết đầu tiên</a>
                                                     </td>
                                                 </tr>
                                             <?php endif; ?>
