@@ -10,7 +10,7 @@ $error = '';
 // xu ly khi nguoi dung submit form
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // lay du lieu tu form
-    $titlle = $_POST['title'];
+    $title = $_POST['title'];
     $excerpt = $_POST['excerpt'];
     $content = $_POST['content'];
     $category_id = $_POST['category'];
@@ -38,14 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // kiem tra dinh dang anh hop le
         $valid_extensions = array('jpg', 'jpeg', 'png', 'gif');
-        if (!in_array($imgfile_type, $valid_extensions)) {
+        if (in_array($imgfile_type, $valid_extensions)) {
             if (move_uploaded_file($_FILES['image']['tmp_name'], $tager_file)) {
                 // chen du lieu vao csdl
                 $sql_insert = "INSERT INTO items (title, excerpt, content, image, category_id, featured, views, author_id) 
-                           VALUES ('$titlle', '$excerpt', '$content', '$file_name', $category_id, $featured, $views, $author_id)";
+                           VALUES ('$title', '$excerpt', '$content', '$file_name', $category_id, $featured, $views, $author_id)";
                 $result = $db->execute($sql_insert);
                 if ($result) {
-                    echo "thêm bài viết thành công";
+                    $suscess = "Thêm bài viết thành công!";
                     // chuyen huong ve trang danh sach
                     header("Location: index.php");
                     exit();
@@ -175,6 +175,22 @@ $categories = $db->select($sql_cat);
                         <div class="col-12 col-6">
                             <div class="card px-5">
                                 <div class="card-body">
+                                    <?php if (!empty($error)): ?>
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            <?= $error ?>
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($suscess)): ?>
+                                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                            <?= $suscess ?>
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                    <?php endif; ?>
                                     <form method="POST" enctype="multipart/form-data" action="">
                                         <div class="form-group">
                                             <label class="form-label">Title</label>
