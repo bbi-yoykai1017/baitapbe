@@ -3,6 +3,18 @@
 require_once 'database.php';
 $db = new Database();
 
+// khoi tao bien bao loi
+
+
+
+
+
+
+// LẤY DANH SÁCH TÁC GIẢ
+$sql_auth = "SELECT * FROM authors";
+$authors = $db->select($sql_auth);
+
+// LẤY DANH SÁCH DANH MỤC
 $sql_cat = "SELECT * FROM categories";
 $categories = $db->select($sql_cat);
 ?>
@@ -155,25 +167,11 @@ $categories = $db->select($sql_cat);
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label">Author</label>
-                                            <select class="form-control" name="author" id="">
+                                            <select class="form-control" name="author" id="" required>
                                                 <option disabled selected>Select an author</option>
-                                                <option value="1">Chúc Ly</option>
-                                                <option value="2">Viết Tuân</option>
-                                                <option value="3">Trần Hóa</option>
-                                                <option value="4">Thanh Danh</option>
-                                                <option value="5">Nguyễn Tiến</option>
-                                                <option value="6">Sơn Hà</option>
-                                                <option value="7">Minh Thư</option>
-                                                <option value="8">Bảo Anh</option>
-                                                <option value="9">An Khang</option>
-                                                <option value="10">Châu Anh</option>
-                                                <option value="11">Phương Thảo</option>
-                                                <option value="12">Mai Nhật</option>
-                                                <option value="13">Thanh Quý</option>
-                                                <option value="14">Hoàng An</option>
-                                                <option value="15">Thùy Lâm</option>
-                                                <option value="16">Như Tâm</option>
-                                                <option value="17">An Bình</option>
+                                                <?php foreach($authors as $a):?>
+                                                <option value="<?= $a['id']?>"><?= $a['name']?></option>
+                                                <?php endforeach;?>
                                             </select>
                                         </div>
                                         <button type="submit" class="btn btn-primary">Add</button>

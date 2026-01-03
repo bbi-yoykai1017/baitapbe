@@ -3,7 +3,7 @@ require_once 'database.php';
 $db = new Database();
 
 // 1. CẤU HÌNH PHÂN TRANG & LẤY THAM SỐ
-$limit = 4;
+$limit = 5;
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
@@ -136,7 +136,7 @@ $items = $db->select($sql);
                                             <?php if (!empty($items)): ?>
                                                 <?php foreach ($items as $row): ?>
                                                     <tr>
-                                                        <!-- <td><strong>#<?php echo $row['id']; ?></strong></td> -->
+                                                        <!-- <td><strong>#<?php //echo $row['id']; ?></strong></td> -->
                                                         <td>
                                                             <?php
                                                             $imgSrc = $row['image'];
