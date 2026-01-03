@@ -4,24 +4,24 @@ require_once 'database.php';
 $db = new Database();
 
 // 2. LẤY THAM SỐ ĐẦU VÀO
-$page       = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1;
-$limit      = 5;
-$offset     = ($page - 1) * $limit;
-$keyword    = trim(filter_input(INPUT_GET, 'keyword') ?? '');
-$cat_id     = filter_input(INPUT_GET, 'cat_id', FILTER_VALIDATE_INT) ?: 0;
+$page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1;
+$limit = 5;
+$offset = ($page - 1) * $limit;
+$keyword = trim(filter_input(INPUT_GET, 'keyword') ?? '');
+$cat_id = filter_input(INPUT_GET, 'cat_id', FILTER_VALIDATE_INT) ?: 0;
 
 // 3. XÂY DỰNG TRUY VẤN
 $conditions = [];
-$params     = [];
+$params = [];
 
 if ($keyword) {
     $conditions[] = "items.title LIKE ?";
-    $params[]     = "%$keyword%";
+    $params[] = "%$keyword%";
 }
 
 if ($cat_id > 0) {
     $conditions[] = "items.category = ?";
-    $params[]     = $cat_id;
+    $params[] = $cat_id;
 }
 
 $whereInfo = !empty($conditions) ? 'WHERE ' . implode(' AND ', $conditions) : '';
@@ -31,9 +31,9 @@ $whereInfo = !empty($conditions) ? 'WHERE ' . implode(' AND ', $conditions) : ''
 $categories = $db->select("SELECT id, name FROM categories ORDER BY name");
 
 // b. Đếm tổng số bản ghi (để phân trang)
-$countSql     = "SELECT COUNT(*) as total FROM items $whereInfo";
+$countSql = "SELECT COUNT(*) as total FROM items $whereInfo";
 $totalRecords = $db->select($countSql, $params)[0]['total'] ?? 0;
-$totalPages   = ceil($totalRecords / $limit);
+$totalPages = ceil($totalRecords / $limit);
 
 // c. Lấy danh sách bài viết
 $sql = "SELECT items.id, items.title, items.excerpt, items.image, items.views, items.created_at,
@@ -46,7 +46,7 @@ $sql = "SELECT items.id, items.title, items.excerpt, items.image, items.views, i
         LIMIT ?, ?";
 
 // Thêm limit/offset vào params để execute
-$paramsItems   = $params; 
+$paramsItems = $params;
 $paramsItems[] = $offset;
 $paramsItems[] = $limit;
 
@@ -55,15 +55,31 @@ $items = $db->select($sql, $paramsItems);
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Quản lý bài viết - E-News Admin</title>
     <link href="./public/css/app.css" rel="stylesheet">
     <style>
-        .thumb-img { width: 80px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #dee2e6; }
-        .text-limit { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .pagination { justify-content: center; }
+        .thumb-img {
+            width: 80px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        .text-limit {
+            max-width: 250px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pagination {
+            justify-content: center;
+        }
     </style>
 </head>
 
@@ -73,8 +89,10 @@ $items = $db->select($sql, $paramsItems);
             <div class="sidebar-content js-simplebar">
                 <a class="sidebar-brand" href="index.php"><span class="align-middle">E-News Admin</span></a>
                 <ul class="sidebar-nav">
-                    <li class="sidebar-item active"><a class="sidebar-link" href="index.php"><i data-feather="file-text"></i> Items</a></li>
-                    <li class="sidebar-item"><a class="sidebar-link" href="categories.php"><i data-feather="archive"></i> Categories</a></li>
+                    <li class="sidebar-item active"><a class="sidebar-link" href="index.php"><i
+                                data-feather="file-text"></i> Items</a></li>
+                    <li class="sidebar-item"><a class="sidebar-link" href="categories.php"><i
+                                data-feather="archive"></i> Categories</a></li>
                 </ul>
             </div>
         </nav>
@@ -86,7 +104,7 @@ $items = $db->select($sql, $paramsItems);
 
             <main class="content">
                 <div class="container-fluid p-0">
-                    
+
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h1 class="h3">Danh sách bài viết</h1>
                         <a href="form_add_item.php" class="btn btn-primary"><i data-feather="plus"></i> Thêm mới</a>
@@ -95,10 +113,11 @@ $items = $db->select($sql, $paramsItems);
                     <div class="card">
                         <div class="card-header pb-0">
                             <h5 class="card-title">Tổng: <strong><?= $totalRecords; ?></strong> bài viết</h5>
-                            
+
                             <form action="" method="GET" class="row mt-3">
                                 <div class="col-md-4 mb-2">
-                                    <input type="text" name="keyword" class="form-control" placeholder="Tìm theo tên..." value="<?= htmlspecialchars($keyword); ?>">
+                                    <input type="text" name="keyword" class="form-control" placeholder="Tìm theo tên..."
+                                        value="<?= htmlspecialchars($keyword); ?>">
                                 </div>
                                 <div class="col-md-3 mb-2">
                                     <select name="cat_id" class="form-control">
@@ -111,8 +130,10 @@ $items = $db->select($sql, $paramsItems);
                                     </select>
                                 </div>
                                 <div class="col-md-3 mb-2 d-flex">
-                                    <button type="submit" class="btn btn-primary mr-2"><i data-feather="search"></i> Tìm</button>
-                                    <a href="index.php" class="btn btn-outline-secondary"><i data-feather="refresh-cw"></i> Reset</a>
+                                    <button type="submit" class="btn btn-primary mr-2"><i data-feather="search"></i>
+                                        Tìm</button>
+                                    <a href="index.php" class="btn btn-outline-secondary"><i
+                                            data-feather="refresh-cw"></i> Reset</a>
                                 </div>
                             </form>
                         </div>
@@ -133,24 +154,27 @@ $items = $db->select($sql, $paramsItems);
                                     <tbody>
                                         <?php if (!empty($items)): ?>
                                             <?php foreach ($items as $row): ?>
-                                                <?php 
-                                                    // Xử lý logic hiển thị ảnh gọn gàng
-                                                    $isUrl = filter_var($row['image'], FILTER_VALIDATE_URL);
-                                                    $imgSrc = $isUrl ? $row['image'] : "./public/images/" . $row['image'];
+                                                <?php
+                                                // Xử lý logic hiển thị ảnh gọn gàng
+                                                $isUrl = filter_var($row['image'], FILTER_VALIDATE_URL);
+                                                $imgSrc = $isUrl ? $row['image'] : "./public/images/" . $row['image'];
                                                 ?>
                                                 <tr>
                                                     <td>
-                                                        <img src="<?= $imgSrc; ?>" class="thumb-img" onerror="this.src='./public/images/no-image.png'" alt="Img">
+                                                        <img src="<?= $imgSrc; ?>" class="thumb-img"
+                                                            onerror="this.src='./public/images/no-image.png'" alt="Img">
                                                     </td>
                                                     <td>
-                                                        <div class="text-limit font-weight-bold" title="<?= htmlspecialchars($row['title']); ?>">
+                                                        <div class="text-limit font-weight-bold"
+                                                            title="<?= htmlspecialchars($row['title']); ?>">
                                                             <?= htmlspecialchars($row['title']); ?>
                                                         </div>
                                                         <small class="text-muted d-block text-limit">
                                                             <?= htmlspecialchars($row['excerpt']); ?>
                                                         </small>
                                                         <small class="text-secondary">
-                                                            <i data-feather="calendar" width="12" height="12"></i> <?= date('d/m/Y', strtotime($row['created_at'])); ?>
+                                                            <i data-feather="calendar" width="12" height="12"></i>
+                                                            <?= date('d/m/Y', strtotime($row['created_at'])); ?>
                                                         </small>
                                                     </td>
                                                     <td>
@@ -164,13 +188,16 @@ $items = $db->select($sql, $paramsItems);
                                                         </span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="font-weight-bold"><?= number_format($row['views']); ?></span>
+                                                        <span
+                                                            class="font-weight-bold"><?= number_format($row['views']); ?></span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <a href="edit_item.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-outline-warning" title="Sửa">
+                                                        <a href="edit_item.php?id=<?= $row['id']; ?>"
+                                                            class="btn btn-sm btn-outline-warning" title="Sửa">
                                                             <i data-feather="edit"></i>
                                                         </a>
-                                                        <a href="javascript:void(0);" onclick="deleteItem(<?= $row['id']; ?>)" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                                        <a href="javascript:void(0);" onclick="deleteItem(<?= $row['id']; ?>)"
+                                                            class="btn btn-sm btn-outline-danger" title="Xóa">
                                                             <i data-feather="trash-2"></i>
                                                         </a>
                                                     </td>
@@ -178,7 +205,8 @@ $items = $db->select($sql, $paramsItems);
                                             <?php endforeach; ?>
                                         <?php else: ?>
                                             <tr>
-                                                <td colspan="6" class="text-center py-4 text-muted">Không tìm thấy dữ liệu nào.</td>
+                                                <td colspan="6" class="text-center py-4 text-muted">Không tìm thấy dữ liệu
+                                                    nào.</td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
@@ -189,34 +217,38 @@ $items = $db->select($sql, $paramsItems);
                                 <nav class="mt-4">
                                     <ul class="pagination">
                                         <li class="page-item <?= ($page <= 1) ? 'disabled' : ''; ?>">
-                                            <a class="page-link" href="?page=<?= $page - 1; ?>&keyword=<?= urlencode($keyword); ?>&cat_id=<?= $cat_id; ?>">Trước</a>
+                                            <a class="page-link"
+                                                href="?page=<?= $page - 1; ?>&keyword=<?= urlencode($keyword); ?>&cat_id=<?= $cat_id; ?>">Trước</a>
                                         </li>
 
-                                        <?php 
-                                            $start = max(1, $page - 2);
-                                            $end = min($totalPages, $page + 2);
+                                        <?php
+                                        $start = max(1, $page - 2);
+                                        $end = min($totalPages, $page + 2);
                                         ?>
-                                        
-                                        <?php if($start > 1): ?>
+
+                                        <?php if ($start > 1): ?>
                                             <li class="page-item"><a class="page-link" href="?page=1...">1</a></li>
                                             <li class="page-item disabled"><span class="page-link">...</span></li>
                                         <?php endif; ?>
 
                                         <?php for ($i = $start; $i <= $end; $i++): ?>
                                             <li class="page-item <?= ($page == $i) ? 'active' : ''; ?>">
-                                                <a class="page-link" href="?page=<?= $i; ?>&keyword=<?= urlencode($keyword); ?>&cat_id=<?= $cat_id; ?>">
+                                                <a class="page-link"
+                                                    href="?page=<?= $i; ?>&keyword=<?= urlencode($keyword); ?>&cat_id=<?= $cat_id; ?>">
                                                     <?= $i; ?>
                                                 </a>
                                             </li>
                                         <?php endfor; ?>
 
-                                        <?php if($end < $totalPages): ?>
+                                        <?php if ($end < $totalPages): ?>
                                             <li class="page-item disabled"><span class="page-link">...</span></li>
-                                            <li class="page-item"><a class="page-link" href="?page=<?= $totalPages; ?>..."><?= $totalPages; ?></a></li>
+                                            <li class="page-item"><a class="page-link"
+                                                    href="?page=<?= $totalPages; ?>..."><?= $totalPages; ?></a></li>
                                         <?php endif; ?>
 
                                         <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : ''; ?>">
-                                            <a class="page-link" href="?page=<?= $page + 1; ?>&keyword=<?= urlencode($keyword); ?>&cat_id=<?= $cat_id; ?>">Sau</a>
+                                            <a class="page-link"
+                                                href="?page=<?= $page + 1; ?>&keyword=<?= urlencode($keyword); ?>&cat_id=<?= $cat_id; ?>">Sau</a>
                                         </li>
                                     </ul>
                                 </nav>
@@ -244,4 +276,5 @@ $items = $db->select($sql, $paramsItems);
         }
     </script>
 </body>
+
 </html>
