@@ -42,8 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (move_uploaded_file($_FILES['image']['tmp_name'], $tager_file)) {
                 // chen du lieu vao csdl
                 $sql_insert = "INSERT INTO items (title, excerpt, content, image, category_id, featured, views, author_id) 
-                           VALUES ('$title', '$excerpt', '$content', '$file_name', $category_id, $featured, $views, $author_id)";
-                $result = $db->execute($sql_insert);
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                $result = $db->execute($sql_insert, [$title, $excerpt, $content, $file_name, $category_id, $featured, $views, $author_id]);
                 if ($result) {
                     $suscess = "Thêm bài viết thành công!";
                     // chuyen huong ve trang danh sach
