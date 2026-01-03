@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $content = $_POST['content'];
     $category_id = $_POST['category'];
     $featured = $_POST['featured'];
-    $views = $_POST['views'];
+    $views = !empty($_POST['views']) ? $_POST['views'] : 0; 
     $author_id = $_POST['author'];
 
     // kiem tra du lieu nhap
