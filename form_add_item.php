@@ -1,3 +1,15 @@
+<?php
+// KẾT NỐI CSDL
+require_once 'database.php';
+$db = new Database();
+
+$sql_cat = "SELECT * FROM categories";
+$categories = $db->select($sql_cat);
+?>
+
+
+
+
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -72,6 +84,7 @@
                 </ul>
             </div>
         </nav><!-- main content-->
+
         <div class="main">
             <nav class="navbar navbar-expand navbar-light navbar-bg">
                 <a class="sidebar-toggle d-flex">
@@ -102,7 +115,7 @@
                         <div class="col-12 col-6">
                             <div class="card px-5">
                                 <div class="card-body">
-                                    <form method="POST" enctype="multipart/form-data" action="add_item.php">
+                                    <form method="POST" enctype="multipart/form-data" action="">
                                         <div class="form-group">
                                             <label class="form-label">Title</label>
                                             <input name="title" type="text" class="form-control" required>
@@ -124,12 +137,9 @@
                                             <label class="form-label">Category</label>
                                             <select class="form-control" name="category" id="">
                                                 <option disabled selected>Select a category</option>
-                                                <option value="1">Thời sự</option>
-                                                <option value="2">Thế giới</option>
-                                                <option value="3">Khoa học</option>
-                                                <option value="4">Giải trí</option>
-                                                <option value="5">Thể thao</option>
-                                                <option value="6">Quân sự</option>
+                                              <?php foreach ($categories as $cat):?>
+                                              <option value="<?= $cat['id'] ?>"><?= $cat['name']?></option>
+                                              <?php endforeach;?>
                                             </select>
                                         </div>
                                         <div class="form-group">
