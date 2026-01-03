@@ -2,45 +2,53 @@
 require_once 'database.php';
 $db = new Database();
 
-// 1. CẤU HÌNH PHÂN TRANG & LẤY THAM SỐ
+// ===== CẤU HÌNH =====
 $limit = 5;
-$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($page - 1) * $limit;
+$keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+$cat_id = isset($_GET['cat_id']) ? (int)$_GET['cat_id'] : 0;
 
-$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
-$cat_id = isset($_GET['cat_id']) ? $_GET['cat_id'] : '';
+// ===== XÂY DỰNG ĐIỀU KIỆN LỌC =====
+$conditions = [];
+$params = [];
 
-// 2. XÂY DỰNG ĐIỀU KIỆN LỌC
-$where = [];
-if ($keyword) {
-    $where[] = "items.title LIKE '%$keyword%'";
+if (!empty($keyword)) {
+    $conditions[] = "items.title LIKE ?";
+    $params[] = "%$keyword%";
 }
-if ($cat_id) {
-    $where[] = "items.category = " . (int)$cat_id; 
+
+if ($cat_id > 0) {
+    $conditions[] = "items.category = ?";
+    $params[] = $cat_id;
 }
-$sqlWhere = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
-// 3. LẤY DANH SÁCH DANH MỤC 
-$categories = $db->select("SELECT * FROM categories");
+$whereClause = !empty($conditions) ? 'WHERE ' . implode(' AND ', $conditions) : '';
 
-// 4. TÍNH TỔNG BÀI VIẾT
-$sqlCount = "SELECT COUNT(*) as total from items $sqlWhere";
-$countresult = $db->select($sqlCount);
-$total_records = $countresult[0]['total'];
-$totalpages = ceil($total_records / $limit);
+// ===== LẤY DANH SÁCH DANH MỤC =====
+$categories = $db->select("SELECT id, name FROM categories ORDER BY name");
 
-// 5. LẤY DỮ LIỆU BÀI VIẾT 
-$sql = "SELECT items.*, 
-               authors.name as author_name,
-               categories.name as category_name
+// ===== TÍNH TỔNG SỐ BÀI VIẾT =====
+$countSql = "SELECT COUNT(*) as total FROM items $whereClause";
+$countResult = $db->select($countSql, $params);
+$totalRecords = $countResult[0]['total'] ?? 0;
+$totalPages = ceil($totalRecords / $limit);
+
+// ===== LẤY DỮ LIỆU BÀI VIẾT =====
+$sql = "SELECT items.id, items.title, items.excerpt, items.image, 
+               items.category, items.views, items.created_at,
+               authors.name as author_name, categories.name as category_name
         FROM items 
         LEFT JOIN authors ON items.author = authors.id 
         LEFT JOIN categories ON items.category = categories.id
-        $sqlWhere
+        $whereClause
         ORDER BY items.created_at DESC
-        LIMIT $offset, $limit"; 
+        LIMIT ?, ?";
 
-$items = $db->select($sql);
+$params[] = $offset;
+$params[] = $limit;
+
+$items = $db->select($sql, $params);
 ?>
 
 <!DOCTYPE html>
@@ -122,30 +130,35 @@ $items = $db->select($sql);
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h5 class="card-title">Tổng: <?php echo $total_records; ?> bài viết</h5>
+                                    <h5 class="card-title mb-0">Tổng: <strong><?php echo $totalRecords; ?></strong> bài viết</h5>
                                 </div>
                                 <div class="card-body">
                                     <form action="" method="GET" class="row mb-3">
                                         <div class="col-md-4">
-                                            <input type="text" name="keyword" class="form-control" placeholder="Nhập tên bài viết..." value="<?= htmlspecialchars($keyword); ?>">
+                                            <input type="text" name="keyword" class="form-control" 
+                                                   placeholder="Nhập tên bài viết..." 
+                                                   value="<?= htmlspecialchars($keyword); ?>">
                                         </div>
                                         <div class="col-md-3">
                                             <select name="cat_id" class="form-control">
                                                 <option value="">-- Tất cả danh mục --</option>
-                                                <?php if(!empty($categories)): ?>
-                                                    <?php foreach ($categories as $cat): ?>
-                                                        <option value="<?= $cat['id']; ?>" <?= ($cat_id == $cat['id']) ? 'selected' : '' ?>>
-                                                            <?= $cat['name']; ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                <?php endif; ?>
+                                                <?php foreach ($categories as $cat): ?>
+                                                    <option value="<?= $cat['id']; ?>" 
+                                                        <?= ($cat_id == $cat['id']) ? 'selected' : ''; ?>>
+                                                        <?= htmlspecialchars($cat['name']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
                                             </select>
                                         </div>
                                         <div class="col-md-2">
-                                            <button type="submit" class="btn btn-primary w-100"><i data-feather="search"></i> Tìm kiếm</button>
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i data-feather="search"></i> Tìm kiếm
+                                            </button>
                                         </div>
                                         <div class="col-md-2">
-                                            <a href="index.php" class="btn btn-outline-secondary w-100"><i data-feather="refresh-cw"></i> Reset</a>
+                                            <a href="index.php" class="btn btn-outline-secondary w-100">
+                                                <i data-feather="refresh-cw"></i> Reset
+                                            </a>
                                         </div>
                                     </form>
 
@@ -170,7 +183,6 @@ $items = $db->select($sql);
                                             <?php if (!empty($items)): ?>
                                                 <?php foreach ($items as $row): ?>
                                                     <tr>
-                                                        <!-- <td><strong>#<?php //echo $row['id']; ?></strong></td> -->
                                                         <td>
                                                             <?php
                                                             $imgSrc = $row['image'];
@@ -178,22 +190,41 @@ $items = $db->select($sql);
                                                                 $imgSrc = "./public/images/" . $imgSrc;
                                                             }
                                                             ?>
-                                                            <img src="<?php echo $imgSrc; ?>" class="thumb-img" onerror="this.src='./public/images/user.jpg'" alt="">
+                                                            <img src="<?= $imgSrc; ?>" class="thumb-img" 
+                                                                 onerror="this.src='./public/images/user.jpg'" alt="Ảnh bài viết">
                                                         </td>
                                                         <td>
-                                                            <div class="text-limit" title="<?php echo htmlspecialchars($row['title']); ?>">
-                                                                <strong><?php echo substr($row['title'], 0, 40); ?>...</strong>
+                                                            <div class="text-limit" title="<?= htmlspecialchars($row['title']); ?>">
+                                                                <strong><?= htmlspecialchars(substr($row['title'], 0, 40)); ?>...</strong>
                                                             </div>
-                                                            <small class="text-muted"><?php echo substr($row['excerpt'], 0, 50); ?>...</small>
+                                                            <small class="text-muted"><?= htmlspecialchars(substr($row['excerpt'], 0, 50)); ?>...</small>
                                                         </td>
-                                                        <td><span class="badge bg-success"><?php echo $row['category_name'] ?? 'Chưa phân loại'; ?></span></td>
-                                                        <td><span class="badge bg-info text-dark"><?php echo $row['author_name'] ?? 'Ẩn danh'; ?></span></td>
-                                                        <td class="d-none d-md-table-cell"><span class="badge bg-warning"><?php echo $row['views']; ?> lượt</span></td>
-                                                        <td class="d-none d-md-table-cell"><small><?php echo date('d/m/Y H:i:s', strtotime($row['created_at'])); ?></small></td>
+                                                        <td>
+                                                            <span class="badge bg-success">
+                                                                <?= htmlspecialchars($row['category_name'] ?? 'Chưa phân loại'); ?>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-info text-dark">
+                                                                <?= htmlspecialchars($row['author_name'] ?? 'Ẩn danh'); ?>
+                                                            </span>
+                                                        </td>
+                                                        <td class="d-none d-md-table-cell">
+                                                            <span class="badge bg-warning"><?= $row['views']; ?> lượt</span>
+                                                        </td>
+                                                        <td class="d-none d-md-table-cell">
+                                                            <small><?= date('d/m/Y H:i', strtotime($row['created_at'])); ?></small>
+                                                        </td>
                                                         <td>
                                                             <div class="btn-group">
-                                                                <button class="btn btn-sm btn-outline-warning"><i data-feather="edit"></i></button>
-                                                                <button class="btn btn-sm btn-outline-danger"><i data-feather="trash-2"></i></button>
+                                                                <button class="btn btn-sm btn-outline-warning" 
+                                                                        onclick="editItem(<?= $row['id']; ?>)">
+                                                                    <i data-feather="edit"></i>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-outline-danger" 
+                                                                        onclick="deleteItem(<?= $row['id']; ?>)">
+                                                                    <i data-feather="trash-2"></i>
+                                                                </button>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -207,20 +238,26 @@ $items = $db->select($sql);
                                             <?php endif; ?>
                                         </tbody>
                                     </table>
-                                    <?php if ($totalpages > 1): ?>
+                                    <?php if ($totalPages > 1): ?>
                                         <div class="d-flex justify-content-center mt-3">
-                                            <nav aria-label="Page navigation">
+                                            <nav aria-label="Phân trang">
                                                 <ul class="pagination">
-                                                    <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>">
-                                                        <a class="page-link" href="?page=<?php echo $page - 1; ?>&keyword=<?php echo $keyword; ?>&cat_id=<?php echo $cat_id; ?>">Trước</a>
+                                                    <li class="page-item <?= ($page <= 1) ? 'disabled' : ''; ?>">
+                                                        <a class="page-link" href="?page=<?= $page - 1; ?>&keyword=<?= urlencode($keyword); ?>&cat_id=<?= $cat_id; ?>">
+                                                            Trước
+                                                        </a>
                                                     </li>
-                                                    <?php for ($i = 1; $i <= $totalpages; $i++): ?>
-                                                        <li class="page-item <?php echo ($page == $i) ? 'active' : ''; ?>">
-                                                            <a class="page-link" href="?page=<?php echo $i; ?>&keyword=<?php echo $keyword; ?>&cat_id=<?php echo $cat_id; ?>"><?php echo $i; ?></a>
+                                                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                                        <li class="page-item <?= ($page == $i) ? 'active' : ''; ?>">
+                                                            <a class="page-link" href="?page=<?= $i; ?>&keyword=<?= urlencode($keyword); ?>&cat_id=<?= $cat_id; ?>">
+                                                                <?= $i; ?>
+                                                            </a>
                                                         </li>
                                                     <?php endfor; ?>
-                                                    <li class="page-item <?php echo ($page >= $totalpages) ? 'disabled' : ''; ?>">
-                                                        <a class="page-link" href="?page=<?php echo $page + 1; ?>&keyword=<?php echo $keyword; ?>&cat_id=<?php echo $cat_id; ?>">Sau</a>
+                                                    <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : ''; ?>">
+                                                        <a class="page-link" href="?page=<?= $page + 1; ?>&keyword=<?= urlencode($keyword); ?>&cat_id=<?= $cat_id; ?>">
+                                                            Sau
+                                                        </a>
                                                     </li>
                                                 </ul>
                                             </nav>
@@ -242,5 +279,18 @@ $items = $db->select($sql);
     </div>
     <script src="./public/js/vendor.js"></script>
     <script src="./public/js/app.js"></script>
+    <script>
+        function editItem(id) {
+            // TODO: Implement edit functionality
+            console.log('Edit item:', id);
+        }
+
+        function deleteItem(id) {
+            if (confirm('Bạn có chắc muốn xóa bài viết này?')) {
+                // TODO: Implement delete functionality
+                console.log('Delete item:', id);
+            }
+        }
+    </script>
 </body>
 </html>
