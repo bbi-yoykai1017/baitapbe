@@ -63,8 +63,42 @@ $items = $db->select($sql);
             <div class="sidebar-content js-simplebar">
                 <a class="sidebar-brand" href="index.php"><span class="align-middle">E-News Admin</span></a>
                 <ul class="sidebar-nav">
-                    <li class="sidebar-item active">
-                        <a class="sidebar-link" href="index.php"><i class="align-middle" data-feather="file-text"></i> <span class="align-middle">Bài viết</span></a>
+                    <li>
+                        <form action="result.php" class="form-inline d-none d-sm-inline-block">
+                            <div class="input-group input-group-navbar">
+                                <input name="q" type="text" class="form-control" placeholder="Search…"
+                                    aria-label="Search" value="">
+                                <div class="input-group-append">
+                                    <button class="btn" type="submit">
+                                        <i class="align-middle" data-feather="search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="index.php">
+                            <i class="align-middle" data-feather="file-text"></i> <span
+                                class="align-middle">Items</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="categories.php">
+                            <i class="align-middle" data-feather="archive"></i> <span
+                                class="align-middle">Categories</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="authors.php">
+                            <i class="align-middle" data-feather="user"></i> <span class="align-middle">Authors</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="#">
+                            <i class="align-middle" data-feather="settings"></i> <span
+                                class="align-middle">Settings</span>
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -155,7 +189,7 @@ $items = $db->select($sql);
                                                         <td><span class="badge bg-success"><?php echo $row['category_name'] ?? 'Chưa phân loại'; ?></span></td>
                                                         <td><span class="badge bg-info text-dark"><?php echo $row['author_name'] ?? 'Ẩn danh'; ?></span></td>
                                                         <td class="d-none d-md-table-cell"><span class="badge bg-warning"><?php echo $row['views']; ?> lượt</span></td>
-                                                        <td class="d-none d-md-table-cell"><small><?php echo date('d/m/Y', strtotime($row['created_at'])); ?></small></td>
+                                                        <td class="d-none d-md-table-cell"><small><?php echo date('d/m/Y H:i:s', strtotime($row['created_at'])); ?></small></td>
                                                         <td>
                                                             <div class="btn-group">
                                                                 <button class="btn btn-sm btn-outline-warning"><i data-feather="edit"></i></button>
