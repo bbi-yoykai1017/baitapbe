@@ -24,24 +24,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     // Kiểm tra xem có file ảnh được upload không
     elseif (!isset($_FILES['image']) || $_FILES['image']['error'] != 0) {
-        $error = "Vui lòng chọn hình ảnh đại diện!"; 
+        $error = "Vui lòng chọn hình ảnh đại diện!";
     } else {
-       // xi ly upload anh
-       $tager_dir = "./public/images/";
-       // dam bao thu muc ton tai
-       if (!file_exists($tager_dir)) {
-           mkdir($tager_dir, 0777, true);
-       }
-       $file_name = time() . '_' . basename($_FILES['image']['name']); // them time() de tranh trung ten
-       $tager_file = $tager_dir . $file_name;
-       $imgfile_type = strtolower(pathinfo($tager_file, PATHINFO_EXTENSION));
+        // xi ly upload anh
+        $tager_dir = "./public/images/";
+        // dam bao thu muc ton tai
+        if (!file_exists($tager_dir)) {
+            mkdir($tager_dir, 0777, true);
+        }
+        $file_name = time() . '_' . basename($_FILES['image']['name']); // them time() de tranh trung ten
+        $tager_file = $tager_dir . $file_name;
+        $imgfile_type = strtolower(pathinfo($tager_file, PATHINFO_EXTENSION));
+
+        // kiem tra dinh dang anh hop le
+        $valid_extensions = array('jpg', 'jpeg', 'png', 'gif');
+        if (!in_array($imgfile_type, $valid_extensions)) {
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $tager_file)) {
+                // chen du lieu vao csdl
+                $sql_insert = "INSERT INTO items (title, excerpt, content, image, category_id, featured, views, author_id) 
+                           VALUES ('$titlle', '$excerpt', '$content', '$file_name', $category_id, $featured, $views, $author_id)";
+                $result = $db->execute($sql_insert);
+                if ($result) {
+                    echo "thêm bài viết thành công";
+                    // chuyen huong ve trang danh sach
+                    header("Location: index.php");
+                    exit();
+                } else {
+                    $error = "Lỗi thêm bài viết.";
+                }
+            } else {
+                $error = "Lỗi khi tải lên hình ảnh.";
+            }
+        }
+        else {
+            $error = "Chỉ cho phép tải lên các định dạng ảnh: " . implode(", ", $valid_extensions);
+        }
     }
 }
-
-
-
-
-
 // LẤY DANH SÁCH TÁC GIẢ
 $sql_auth = "SELECT * FROM authors";
 $authors = $db->select($sql_auth);
@@ -178,9 +197,9 @@ $categories = $db->select($sql_cat);
                                             <label class="form-label">Category</label>
                                             <select class="form-control" name="category" id="">
                                                 <option disabled selected>Select a category</option>
-                                              <?php foreach ($categories as $cat):?>
-                                              <option value="<?= $cat['id'] ?>"><?= $cat['name']?></option>
-                                              <?php endforeach;?>
+                                                  <?php foreach ($categories as $cat): ?>
+                                                    <option value="<?= $cat['id'] ?>"><?= $cat['name'] ?></option>
+                                                  <?php endforeach; ?>
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -198,9 +217,9 @@ $categories = $db->select($sql_cat);
                                             <label class="form-label">Author</label>
                                             <select class="form-control" name="author" id="" required>
                                                 <option disabled selected>Select an author</option>
-                                                <?php foreach($authors as $a):?>
-                                                <option value="<?= $a['id']?>"><?= $a['name']?></option>
-                                                <?php endforeach;?>
+                                                <?php foreach ($authors as $a): ?>
+                                                    <option value="<?= $a['id'] ?>"><?= $a['name'] ?></option>
+                                                <?php endforeach; ?>
                                             </select>
                                         </div>
                                         <button type="submit" class="btn btn-primary">Add</button>
