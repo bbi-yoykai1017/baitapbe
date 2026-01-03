@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (in_array($imgfile_type, $valid_extensions)) {
             if (move_uploaded_file($_FILES['image']['tmp_name'], $tager_file)) {
                 // chen du lieu vao csdl
-                $sql_insert = "INSERT INTO items (title, excerpt, content, image, category_id, featured, views, author_id) 
+                $sql_insert = "INSERT INTO items (title, excerpt, content, image, category, featured, views, author) 
                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 $result = $db->execute($sql_insert, [$title, $excerpt, $content, $file_name, $category_id, $featured, $views, $author_id]);
                 if ($result) {
