@@ -3,8 +3,40 @@
 require_once 'database.php';
 $db = new Database();
 
-// khoi tao bien bao loi
+// khoi tao bien bao loi/thanh cong
+$suscess = '';
+$error = '';
 
+// xu ly khi nguoi dung submit form
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // lay du lieu tu form
+    $titlle = $_POST['title'];
+    $excerpt = $_POST['excerpt'];
+    $content = $_POST['content'];
+    $category_id = $_POST['category'];
+    $featured = $_POST['featured'];
+    $views = $_POST['views'];
+    $author_id = $_POST['author'];
+
+    // kiem tra du lieu nhap
+    if (empty($title) || empty($category_id) || empty($author_id)) {
+        $error = "Vui lòng nhập đầy đủ thông tin";
+    }
+    // Kiểm tra xem có file ảnh được upload không
+    elseif (!isset($_FILES['image']) || $_FILES['image']['error'] != 0) {
+        $error = "Vui lòng chọn hình ảnh đại diện!"; 
+    } else {
+       // xi ly upload anh
+       $tager_dir = "./public/images/";
+       // dam bao thu muc ton tai
+       if (!file_exists($tager_dir)) {
+           mkdir($tager_dir, 0777, true);
+       }
+       $file_name = time() . '_' . basename($_FILES['image']['name']); // them time() de tranh trung ten
+       $tager_file = $tager_dir . $file_name;
+       $imgfile_type = strtolower(pathinfo($tager_file, PATHINFO_EXTENSION));
+    }
+}
 
 
 
@@ -18,9 +50,6 @@ $authors = $db->select($sql_auth);
 $sql_cat = "SELECT * FROM categories";
 $categories = $db->select($sql_cat);
 ?>
-
-
-
 
 <!DOCTYPE html>
 <html lang="vi">
