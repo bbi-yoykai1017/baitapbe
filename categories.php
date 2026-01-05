@@ -176,19 +176,19 @@ $categories = $db->query($sql, $params);
 
                     <div class="card md-3">
                         <div class="card-body">
-                            <form action="categories.php" method="GET" class="form-inline">
+                            <form action="index.php" method="GET" class="form-inline">
                                 <input type="text" name="search" class="form-control mr2"
                                     placeholder="Nhập tên danh mục....." value="<?= $search; ?>">
-                                <select name="cat_id" class="form-control ml-2">
-                                    <option value="0">-- Tất cả danh mục cha --</option>
-                                    <?php foreach ($categories_dropdown as $cat): ?>
-                                        <option value="<?= $cat['id']; ?>" <?= ($cat_id == $cat['id']) ? 'selected' : ''; ?>>
-                                            <?= htmlspecialchars($cat['name']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <button type="submit" class="btn btn-primary ml-2">Tìm kiếm</button>
-                                <a href="categories.php" class="btn btn-secondary ml-2">Làm mới</a>
+                                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                                <a href="index.php" class="btn btn-secondary ml-2">Làm mới</a>
+                                 <select name="cat_id" class="form-control">
+                                        <option value="0">-- Tất cả danh mục --</option>
+                                        <?php foreach ($categories as $cat): ?>
+                                            <option value="<?= $cat['id']; ?>" <?= ($cat_id == $cat['id']) ? 'selected' : ''; ?>>
+                                                <?= htmlspecialchars($cat['name']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
                             </form>
                         </div>        
                     </div>
@@ -242,19 +242,19 @@ $categories = $db->query($sql, $params);
                                 <nav aria-label="Page navigation">
                                     <ul class="pagination">
                                         <li class="page-item <?php if($page <= 1) echo 'disabled'; ?>">
-                                            <a class="page-link" href="?page=<?php echo $page-1; ?>&search=<?php echo urlencode($search); ?>&cat_id=<?php echo $cat_id; ?>">Trước</a>
+                                            <a class="page-link" href="?page=<?php echo $page-1; ?>&search=<?php echo $search; ?>">Trước</a>
                                         </li>
 
                                         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                             <li class="page-item <?php if($page == $i) echo 'active'; ?>">
-                                                <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&cat_id=<?php echo $cat_id; ?>">
+                                                <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo $search; ?>">
                                                     <?php echo $i; ?>
                                                 </a>
                                             </li>
                                         <?php endfor; ?>
 
                                         <li class="page-item <?php if($page >= $total_pages) echo 'disabled'; ?>">
-                                            <a class="page-link" href="?page=<?php echo $page+1; ?>&search=<?php echo urlencode($search); ?>&cat_id=<?php echo $cat_id; ?>">Sau</a>
+                                            <a class="page-link" href="?page=<?php echo $page+1; ?>&search=<?php echo $search; ?>">Sau</a>
                                         </li>
                                     </ul>
                                 </nav>

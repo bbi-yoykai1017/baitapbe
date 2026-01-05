@@ -267,14 +267,6 @@ $items = $db->select($sql, $paramsItems);
     </div>
 
     <script src="./public/js/app.js"></script>
-    <script>
-        function deleteItem(id) {
-            if (confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa bài viết này không?')) {
-                // Chuyển hướng đến file xử lý xóa
-                window.location.href = 'delete_item.php?id=' + id;
-            }
-        }
-    </script>
 </body>
 
 </html>
