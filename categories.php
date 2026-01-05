@@ -1,3 +1,51 @@
+<?php
+require_once 'database.php';
+$db = new Database();
+
+// --- CẤU HÌNH PHÂN TRANG ---
+$limit = 5; // Số bản tin một trang
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+if ($page < 1)
+    $page = 1;
+$offset = ($page - 1) * $limit;
+
+// --- XỬ LÝ TÌM KIẾM ---
+$search = "";
+$where_clause = "";
+$params = [];
+
+if (isset($_GET['search']) && !empty($_GET['search'])) {
+    $search = $_GET['search'];
+    $where_clause = " WHERE c1.name LIKE ?";
+    $params[] = "%" . $search . "%";
+}
+
+// --- BƯỚC 1: ĐẾM TỔNG SỐ BẢN GHI (Để tính số trang) ---
+// Dùng biến params riêng cho việc đếm vì query đếm không cần limit/offset
+$sql_count = "SELECT COUNT(*) as total FROM categories c1" . $where_clause;
+$count_result = $db->query($sql_count, $params);
+$total_records = $count_result[0]['total'];
+$total_pages = ceil($total_records / $limit);
+
+// --- BƯỚC 2: LẤY DỮ LIỆU CÓ PHÂN TRANG ---
+$sql = "SELECT c1.*, c2.name as parent_name 
+        FROM categories c1 
+        LEFT JOIN categories c2 ON c1.parent = c2.id"
+    . $where_clause .
+    " ORDER BY c1.name ASC LIMIT ? OFFSET ?";
+
+// Thêm tham số cho LIMIT và OFFSET
+// Lưu ý: Class Database của bạn dùng bind_param với 'i' cho integer, nên phải ép kiểu hoặc đảm bảo là số nguyên
+$params[] = $limit;
+$params[] = $offset;
+
+$categories = $db->query($sql, $params);
+
+?>
+
+
+
+
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -20,6 +68,16 @@
         .btn.btn-secondary.active {
             background-color: #3b7ddd !important;
             border-color: #3b7ddd !important;
+        }
+
+        .category-img {
+            width: 50px;
+            height: auto;
+        }
+
+        .pagination {
+            justify-content: center;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -102,9 +160,21 @@
                             <h1 class="h3 mb-3">Manage Categories</h1>
                         </div>
                     </div>
+
+                    <div class="card md-3">
+                        <div class="card-body">
+                            <form action="index.php" method="GET" class="form-inline">
+                                <input type="text" name="search" class="form-control mr2"
+                                    placeholder="Nhập tên danh mục....." value="<?= $search; ?>">
+                                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                                <a href="index.php" class="btn btn-secondary ml-2">Làm mới</a>
+                            </form>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-12 my-2">
-                            <a href="form_add_cate.php">
+                            <a href="form_edit_cate.php">
                                 <button type="button" class="btn btn-primary">
                                     Add Categories
                                 </button>
@@ -115,90 +185,58 @@
                                 <table class="table table-striped table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>Image</th>
-                                            <th>Name</th>
-                                            <th>Slug</th>
-                                            <th>Parent</th>
-                                            <th>Action</th>
+                                            <th>ID</th>
+                                            <th>Tên danh mục</th>
+                                            <th>Danh mục cha</th>
+                                            <th>Hình ảnh</th>
+                                            <th>Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td><img style="width:100px" src="./public/images/images.png"></td>
-                                            <td>Thời sự</td>
-                                            <td>thoi-su</td>
-                                            <td>No</td>
-                                            <td class="table-action">
-                                                <a href="manuformedit.html"><i class="align-middle"
-                                                        data-feather="edit-2"></i></a>
-                                                <a href="#">
-                                                    <i class="align-middle" data-feather="trash"></i></a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><img style="width:100px" src="./public/images/images.jpg"></td>
-                                            <td>Thế giới</td>
-                                            <td>the-gioi</td>
-                                            <td>No</td>
-                                            <td class="table-action">
-                                                <a href="manuformedit.html"><i class="align-middle"
-                                                        data-feather="edit-2"></i></a>
-                                                <a href="#">
-                                                    <i class="align-middle" data-feather="trash"></i></a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><img style="width:100px" src="./public/images/images (1).png"></td>
-                                            <td>Khoa học</td>
-                                            <td>khoa-hoc</td>
-                                            <td>No</td>
-                                            <td class="table-action">
-                                                <a href="manuformedit.html"><i class="align-middle"
-                                                        data-feather="edit-2"></i></a>
-                                                <a href="#">
-                                                    <i class="align-middle" data-feather="trash"></i></a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><img style="width:100px" src="./public/images/giaitri.png"></td>
-                                            <td>Giải trí</td>
-                                            <td>giai-tri</td>
-                                            <td>No</td>
-                                            <td class="table-action">
-                                                <a href="manuformedit.html"><i class="align-middle"
-                                                        data-feather="edit-2"></i></a>
-                                                <a href="#">
-                                                    <i class="align-middle" data-feather="trash"></i></a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><img style="width:100px" src="./public/images/images (1).jpg"></td>
-                                            <td>Thể thao</td>
-                                            <td>the-thao</td>
-                                            <td>No</td>
-                                            <td class="table-action">
-                                                <a href="manuformedit.html"><i class="align-middle"
-                                                        data-feather="edit-2"></i></a>
-                                                <a href="#">
-                                                    <i class="align-middle" data-feather="trash"></i></a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><img style="width:100px"
-                                                    src="./public/images/pngtree-military-truck-line-icon-png-image_9015917.png">
-                                            </td>
-                                            <td>Quân sự</td>
-                                            <td>quan-su</td>
-                                            <td>No</td>
-                                            <td class="table-action">
-                                                <a href="manuformedit.html"><i class="align-middle"
-                                                        data-feather="edit-2"></i></a>
-                                                <a href="#">
-                                                    <i class="align-middle" data-feather="trash"></i></a>
-                                            </td>
-                                        </tr>
+                                       <?php if (!empty($categories)): ?>
+                                        <?php foreach ($categories as $row): ?>
+                                            <tr>
+                                                <td><?php echo $row['id']; ?></td>
+                                                <td><?php echo $row['name']; ?></td>
+                                                <td>
+                                                    <?php echo ($row['parent'] != 0 && $row['parent_name']) ? $row['parent_name'] : "No"; ?>
+                                                </td>
+                                                <td>
+                                                    <?php if($row['image']): ?>
+                                                        <img src="./public/images/<?php echo $row['image']; ?>" class="category-img" alt="img">
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <a href="form_edit_cate.php?id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm">Sửa</a>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr><td colspan="5" class="text-center">Không tìm thấy dữ liệu</td></tr>
+                                    <?php endif; ?>
                                     </tbody>
                                 </table>
+                                <?php if ($total_pages > 1): ?>
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination">
+                                        <li class="page-item <?php if($page <= 1) echo 'disabled'; ?>">
+                                            <a class="page-link" href="?page=<?php echo $page-1; ?>&search=<?php echo $search; ?>">Trước</a>
+                                        </li>
+
+                                        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                            <li class="page-item <?php if($page == $i) echo 'active'; ?>">
+                                                <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo $search; ?>">
+                                                    <?php echo $i; ?>
+                                                </a>
+                                            </li>
+                                        <?php endfor; ?>
+
+                                        <li class="page-item <?php if($page >= $total_pages) echo 'disabled'; ?>">
+                                            <a class="page-link" href="?page=<?php echo $page+1; ?>&search=<?php echo $search; ?>">Sau</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -238,4 +276,4 @@
     <script src="./public/js/app.js"></script>
 </body>
 
-</html>
+</html> 
