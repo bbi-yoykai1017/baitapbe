@@ -87,12 +87,47 @@ $items = $db->select($sql, $paramsItems);
     <div class="wrapper">
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-content js-simplebar">
-                <a class="sidebar-brand" href="index.php"><span class="align-middle">E-News Admin</span></a>
+                <a class="sidebar-brand" href="#">
+                    <span class="align-middle">E-News Admin</span>
+                </a>
                 <ul class="sidebar-nav">
-                    <li class="sidebar-item active"><a class="sidebar-link" href="index.php"><i
-                                data-feather="file-text"></i> Items</a></li>
-                    <li class="sidebar-item"><a class="sidebar-link" href="categories.php"><i
-                                data-feather="archive"></i> Categories</a></li>
+                    <li>
+                        <form action="result.php" class="form-inline d-none d-sm-inline-block">
+                            <div class="input-group input-group-navbar">
+                                <input name="q" type="text" class="form-control" placeholder="Search…"
+                                    aria-label="Search" value="">
+                                <div class="input-group-append">
+                                    <button class="btn" type="submit">
+                                        <i class="align-middle" data-feather="search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="index.php">
+                            <i class="align-middle" data-feather="file-text"></i> <span
+                                class="align-middle">Items</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="categories.php">
+                            <i class="align-middle" data-feather="archive"></i> <span
+                                class="align-middle">Categories</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="authors.php">
+                            <i class="align-middle" data-feather="user"></i> <span class="align-middle">Authors</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="#">
+                            <i class="align-middle" data-feather="settings"></i> <span
+                                class="align-middle">Settings</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </nav>
