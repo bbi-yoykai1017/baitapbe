@@ -9,10 +9,11 @@ if ($page < 1)
     $page = 1;
 $offset = ($page - 1) * $limit;
 
-// --- XỬ LÝ TÌM KIẾM ---
+// --- XỬ LÝ TÌM KIẾM VÀ LỌC ---
 $search = "";
 $where_clause = "";
 $params = [];
+$cat_id = filter_input(INPUT_GET, 'cat_id', FILTER_VALIDATE_INT) ?: 0;
 
 if (isset($_GET['search']) && !empty($_GET['search'])) {
     $search = $_GET['search'];
@@ -20,6 +21,18 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     $params[] = "%" . $search . "%";
 }
 
+// Thêm điều kiện lọc theo danh mục cha nếu được chọn
+if ($cat_id > 0) {
+    if ($where_clause) {
+        $where_clause .= " AND c1.parent = ?";
+    } else {
+        $where_clause = " WHERE c1.parent = ?";
+    }
+    $params[] = $cat_id;
+}
+
+// a. Lấy danh sách danh mục (cho dropdown)
+$categories_dropdown = $db->select("SELECT id, name FROM categories ORDER BY name");
 // --- BƯỚC 1: ĐẾM TỔNG SỐ BẢN GHI (Để tính số trang) ---
 // Dùng biến params riêng cho việc đếm vì query đếm không cần limit/offset
 $sql_count = "SELECT COUNT(*) as total FROM categories c1" . $where_clause;
@@ -163,15 +176,23 @@ $categories = $db->query($sql, $params);
 
                     <div class="card md-3">
                         <div class="card-body">
-                            <form action="index.php" method="GET" class="form-inline">
+                            <form action="categories.php" method="GET" class="form-inline">
                                 <input type="text" name="search" class="form-control mr2"
                                     placeholder="Nhập tên danh mục....." value="<?= $search; ?>">
-                                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-                                <a href="index.php" class="btn btn-secondary ml-2">Làm mới</a>
+                                <select name="cat_id" class="form-control ml-2">
+                                    <option value="0">-- Tất cả danh mục cha --</option>
+                                    <?php foreach ($categories_dropdown as $cat): ?>
+                                        <option value="<?= $cat['id']; ?>" <?= ($cat_id == $cat['id']) ? 'selected' : ''; ?>>
+                                            <?= htmlspecialchars($cat['name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <button type="submit" class="btn btn-primary ml-2">Tìm kiếm</button>
+                                <a href="categories.php" class="btn btn-secondary ml-2">Làm mới</a>
                             </form>
-                        </div>
+                        </div>        
                     </div>
-
+                   
                     <div class="row">
                         <div class="col-12 my-2">
                             <a href="form_edit_cate.php">
@@ -180,6 +201,7 @@ $categories = $db->query($sql, $params);
                                 </button>
                             </a>
                         </div>
+                        
                         <div class="col-12">
                             <div class="card">
                                 <table class="table table-striped table-bordered">
@@ -220,19 +242,19 @@ $categories = $db->query($sql, $params);
                                 <nav aria-label="Page navigation">
                                     <ul class="pagination">
                                         <li class="page-item <?php if($page <= 1) echo 'disabled'; ?>">
-                                            <a class="page-link" href="?page=<?php echo $page-1; ?>&search=<?php echo $search; ?>">Trước</a>
+                                            <a class="page-link" href="?page=<?php echo $page-1; ?>&search=<?php echo urlencode($search); ?>&cat_id=<?php echo $cat_id; ?>">Trước</a>
                                         </li>
 
                                         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                             <li class="page-item <?php if($page == $i) echo 'active'; ?>">
-                                                <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo $search; ?>">
+                                                <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&cat_id=<?php echo $cat_id; ?>">
                                                     <?php echo $i; ?>
                                                 </a>
                                             </li>
                                         <?php endfor; ?>
 
                                         <li class="page-item <?php if($page >= $total_pages) echo 'disabled'; ?>">
-                                            <a class="page-link" href="?page=<?php echo $page+1; ?>&search=<?php echo $search; ?>">Sau</a>
+                                            <a class="page-link" href="?page=<?php echo $page+1; ?>&search=<?php echo urlencode($search); ?>&cat_id=<?php echo $cat_id; ?>">Sau</a>
                                         </li>
                                     </ul>
                                 </nav>
