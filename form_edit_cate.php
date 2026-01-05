@@ -60,7 +60,7 @@ if (!empty($data)) {
 // 2. Lấy danh sách danh mục khác để đổ vào dropdown (trừ chính nó để tránh vòng lặp cha-con)
 $list_categories = $db->query("SELECT * FROM categories WHERE id != ?", [$id]);
 
-// 3. Lấy tên danh mục cha hiện tại (để hiển thị text)
+// 3. Lấy tên danh mục cha hiện tại
 $parent_name_display = "No";
 if ($category['parent'] != 0) {
     $p_data = $db->query("SELECT name FROM categories WHERE id = ?", [$category['parent']]);
